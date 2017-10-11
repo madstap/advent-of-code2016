@@ -43,13 +43,12 @@
 (defn step [pos cardinal]
   (mapv + pos (cardinals cardinal)))
 
-(defn steps [pos cardinal n]
-  (nth (iterate #(step % cardinal) pos) n))
-
 (defn go [{:keys [pos cardinal]} [direction distance]]
-  (let [new-cardinal (turn cardinal direction)]
+  (let [new-cardinal (turn cardinal direction)
+        positions (take distance (rest (iterate #(step % new-cardinal) pos)))]
     {:cardinal new-cardinal
-     :pos (steps pos new-cardinal distance)}))
+     :all-positions positions
+     :pos (last positions)}))
 
 (def start
   {:pos [0 0]
@@ -72,5 +71,21 @@
   (= 12 (solve-part1 "R5, L5, R5, R3"))
 
   (solve-part1 (slurp "resources/day1.txt")) ;=> 300
+
+  )
+
+(defn solve-part2 [path-s]
+  (let [positions (->> (parse path-s)
+                       (reductions go start)
+                       (mapcat :all-positions))
+        multiple-visits (->> (frequencies positions)
+                             (medley/filter-vals #(not= % 1)))]
+    (distance (medley/find-first (partial contains? multiple-visits) positions))))
+
+(comment
+
+  (= 4 (solve-part2 "R8, R4, R4, R8"))
+
+  (solve-part2 (slurp "resources/day1.txt")) ;=> 159
 
   )
