@@ -3,7 +3,7 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]))
 
-(def keypad
+(def normal-keypad
   [[1 2 3]
    [4 5 6]
    [7 8 9]])
@@ -19,34 +19,56 @@
   (->> (str/split-lines s)
        (map (partial keep {\U :up, \D :down, \L :left, \R :right}))))
 
-(def start [1 1])
-
 (assert (= 5 (get-in keypad start)))
 
-(defn key-exists? [coord]
+(defn key-exists? [keypad coord]
   (boolean (get-in keypad coord)))
 
-(defn move [coord direction]
+(defn move [keypad coord direction]
   (let [new-coord (mapv + coord (directions direction))]
-    (if (key-exists? new-coord) new-coord coord)))
+    (if (key-exists? keypad new-coord) new-coord coord)))
+
+(defn find-code [keypad start lines]
+  (->> (reduce (fn [acc line]
+                 (conj acc (reduce (partial move keypad)
+                                   (or (last acc) start)
+                                   line)))
+               []
+               lines)
+       (mapv (partial get-in keypad))
+       (apply str)))
 
 (defn solve-part1 [input]
-  (let [coords (reduce (fn [acc line]
-                         (conj acc (reduce move (or (last acc) start) line)))
-                       []
-                       (parse input))]
-    (apply str (mapv (partial get-in keypad) coords))))
+  (find-code normal-keypad [1 1] (parse input)))
 
-(comment
-
-  (def example
-    "ULL
+(def example
+  "ULL
   RRDDD
   LURDL
   UUUUD")
 
+(comment
+
   (= "1985" (solve-part1 example))
 
   (solve-part1 (slurp "resources/day2.txt")) ;=> "56983"
+
+  )
+
+(def fancy-keypad
+  [[nil nil  1  nil nil]
+   [nil  2   3   4  nil]
+   [ 5   6   7   8   9 ]
+   [nil "A" "B" "C" nil]
+   [nil nil "D" nil nil]])
+
+(defn solve-part2 [input]
+  (find-code fancy-keypad [2 0] (parse input)))
+
+(comment
+
+  (= "5DB3" (solve-part2 example))
+
+  (solve-part2 (slurp "resources/day2.txt")) ;=> "8B8B1"
 
   )
