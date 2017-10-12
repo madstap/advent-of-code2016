@@ -7,8 +7,7 @@
 (defn parse [s]
   (->> (str/split-lines s)
        (map (partial re-seq #"\d+"))
-       (map (partial map comfy/str->int))
-       (map sort)))
+       (map (partial map comfy/str->int))))
 
 (def input
   (parse (slurp "resources/day3.txt")))
