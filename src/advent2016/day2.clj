@@ -19,8 +19,6 @@
   (->> (str/split-lines s)
        (map (partial keep {\U :up, \D :down, \L :left, \R :right}))))
 
-(assert (= 5 (get-in keypad start)))
-
 (defn key-exists? [keypad coord]
   (boolean (get-in keypad coord)))
 
