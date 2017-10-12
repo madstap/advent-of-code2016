@@ -1,5 +1,6 @@
 (ns advent2016.day4
   (:require
+   [medley.core :as medley]
    [madstap.comfy :as comfy]
    [clojure.set :as set]
    [clojure.string :as str]))
@@ -61,5 +62,31 @@
   (= 1514 (solve-part1 all-examples))
 
   (solve-part1 input) ;=> 185371
+
+  )
+
+(def alphabet "abcdefghijklmnopqrstuvwxyz")
+
+(defn shift [char n]
+  (-> (cycle alphabet)
+      (->> (drop-while (complement #{char})))
+      (nth n)))
+
+(defn decrypt [{:keys [name sector]}]
+  (->> name
+       (map #(if (= \- %) \space (shift % sector)))
+       (apply str)
+       (str/trimr)))
+
+(def encryption-example (parse-room "qzmt-zixmtkozy-ivhz-343[xxxxx]"))
+
+(defn solve-part2 [input]
+  (:sector (medley/find-first #(re-find #"north" (decrypt %)) input)))
+
+(comment
+
+  (= "very encrypted name" (decrypt encryption-example))
+
+  (solve-part2 input) ;=> 984
 
   )
