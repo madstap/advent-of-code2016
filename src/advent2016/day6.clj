@@ -37,3 +37,18 @@ enarar"
   (solve-part1 input) ;=> "umcvzsmw"
 
   )
+
+(defn solve-part2 [inp]
+  (transduce (comp (map frequencies)
+                   (map (partial apply min-key val))
+                   (map key))
+             str
+             (apply map vector inp)))
+
+(comment
+
+  (= "advent" (solve-part2 example))
+
+  (solve-part2 input) ;=> "rwqoacfz"
+
+  )
